@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>A Special Surprise for Pari!</title>
+    <style>
+        /* --- Basic Setup & Typography --- */
+        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Poppins:wght@300;400&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            height: 100vh;
+            background: radial-gradient(ellipse at bottom, #1B2735 0%, #090A0F 100%);
+            overflow: hidden;
+            color: #fff;
+            text-align: center; /* <-- ADDED THIS LINE */
+        }
+
+        /* --- The 3D Canvas Background --- */
+        #bg-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+        }
+
+        /* --- Balloons CSS --- */
+        #balloon-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0; /* Behind content, in front of stars */
+            overflow: hidden;
+            pointer-events: none; /* Allows clicks to go through to the content */
+        }
+
+        .balloon {
+            position: absolute;
+            bottom: -200px; /* Start off-screen */
+            width: 80px;
+            height: 100px;
+            border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+            background-size: cover;
+            opacity: 0.8;
+            /* Animation will be set by JS */
+        }
+
+        .balloon::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 0;
+            border-left: 5px solid transparent;
+            border-right: 5px solid transparent;
+            border-bottom: 10px solid;
+        }
+        .balloon.pink { background-image: radial-gradient(circle at 30% 30%, #ffc0cb, #e75480); }
+        .balloon.pink::after { border-bottom-color: #e75480; }
+        .balloon.blue { background-image: radial-gradient(circle at 30% 30%, #87ceeb, #4682b4); }
+        .balloon.blue::after { border-bottom-color: #4682b4; }
+        .balloon.yellow { background-image: radial-gradient(circle at 30% 30%, #fffacd, #ffd700); }
+        .balloon.yellow::after { border-bottom-color: #ffd700; }
+        .balloon.green { background-image: radial-gradient(circle at 30% 30%, #98fb98, #3cb371); }
+        .balloon.green::after { border-bottom-color: #3cb371; }
+
+        @keyframes floatUp {
+            0% { transform: translateY(0) rotate(0deg); opacity: 0.8; }
+            100% { transform: translateY(-150vh) rotate(360deg); opacity: 0; }
+        }
+
+        /* START: NEW CSS FOR CONFETTI */
+        #confetti-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 99;
+            overflow: hidden;
+        }
+
+        .confetti {
+            position: absolute;
+            width: 10px;
+            height: 15px;
+            top: -20px;
+            opacity: 0;
+            /* JS will randomize color and animation */
+        }
+
+        @keyframes fall {
+            0% {
+                transform: translateY(0vh) rotateZ(0deg);
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(110vh) rotateZ(720deg);
+                opacity: 0;
+            }
+        }
+        /* END: NEW CSS FOR CONFETTI */
+
+
+        /* --- The Initial Surprise Curtain --- */
+        #curtain {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #090A0F;
+            z-index: 100;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+        }
+
+        .prompt {
+            /* text-align: center; This is now inherited from body */
+            font-size: 1.5rem;
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .prompt svg {
+            width: 80px;
+            height: 80px;
+            margin-bottom: 20px;
+            fill: #FFD700;
+            animation: pulse 2s infinite ease-in-out;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); filter: drop-shadow(0 0 5px #FFD700); }
+            50% { transform: scale(1.1); filter: drop-shadow(0 0 20px #FFD700); }
+        }
+
+        /* --- Main Birthday Content --- */
+        #birthday-content {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            /* text-align: center; This is now inherited from body */
+            padding: 20px;
+            position: relative;
+            z-index: 1;
+            visibility: hidden; 
+        }
+
+        h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(2.5rem, 8vw, 6rem);
+            font-weight: 700;
+            color: #fff;
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.5), 0 0 20px rgba(255, 215, 0, 0.7);
+            margin-bottom: 10px;
+        }
+        /* NEW: Style for individual characters in heading */
+        h1 span.char, h2 span.char {
+            display: inline-block;
+        }
+
+        h2 {
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(1.5rem, 4vw, 3rem); /* Slightly smaller to fit date */
+            color: #FFD700;
+            text-shadow: 0 0 15px #FFD700;
+            margin-bottom: 30px;
+        }
+        
+        .image-container {
+            margin: 0 0 30px 0;
+            position: relative;
+        }
+
+        #pari-image {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid #FFD700;
+            box-shadow: 0 0 15px rgba(255, 215, 0, 0.6), 0 0 25px rgba(255, 215, 0, 0.4);
+            animation: glow-pulse 3s infinite ease-in-out;
+        }
+
+        @keyframes glow-pulse {
+            0%, 100% { box-shadow: 0 0 15px rgba(255, 215, 0, 0.6), 0 0 25px rgba(255, 215, 0, 0.4); }
+            50% { box-shadow: 0 0 25px rgba(255, 215, 0, 0.8), 0 0 40px rgba(255, 215, 0, 0.6); }
+        }
+
+        .message {
+            font-size: clamp(1rem, 2.5vw, 1.3rem);
+            max-width: 600px;
+            line-height: 1.8;
+            color: rgba(255, 255, 255, 0.85);
+        }
+
+        /* --- Countdown Timer --- */
+        #countdown {
+            margin-top: 40px;
+            display: flex;
+            gap: 20px;
+            justify-content: center; /* Ensures flex items are centered if they wrap */
+        }
+
+        .time-box {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 15px 20px;
+            border-radius: 10px;
+            backdrop-filter: blur(5px);
+            min-width: 90px;
+        }
+
+        .time-box span { display: block; font-size: 2.5rem; font-weight: bold; }
+        .time-box p { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; color: rgba(255, 255, 255, 0.7); }
+        
+        @media (max-width: 480px) {
+            #pari-image { width: 120px; height: 120px; }
+            #countdown { gap: 10px; }
+            .time-box { min-width: 70px; padding: 10px; }
+            .time-box span { font-size: 1.8rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 1. The Surprise Curtain -->
+    <div id="curtain">
+        <div class="prompt">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
+            <p>A little star for you... Click it.</p>
+        </div>
+    </div>
+
+    <!-- 2. The 3D Background Canvas -->
+    <canvas id="bg-canvas"></canvas>
+
+    <!-- 3. Balloons Container -->
+    <div id="balloon-container"></div>
+    
+    <!-- START: NEW HTML FOR CONFETTI -->
+    <div id="confetti-container"></div>
+    <!-- END: NEW HTML FOR CONFETTI -->
+
+    <!-- 4. The Main Birthday Content -->
+    <div id="birthday-content">
+        <div class="content-wrapper">
+            <h1 id="main-heading">Happy Birthday</h1>
+            <h2 id="sub-heading">Pari Thokchom | 15 Aug 2025</h2>
+            
+            <div class="image-container">
+                <img id="pari-image" src="https://github.com/Anandkhuman/Photo/raw/main/pari.jpg" alt="A photo of Pari">
+            </div>
+
+            <p class="message">
+                May your day be as bright as the countless stars in the universe, and may your year be filled with endless joy, wonder, and beautiful moments.
+            </p>
+            <div id="countdown">
+                <div class="time-box"> <span id="days">00</span> <p>Days</p> </div>
+                <div class="time-box"> <span id="hours">00</span> <p>Hours</p> </div>
+                <div class="time-box"> <span id="minutes">00</span> <p>Minutes</p> </div>
+                <div class="time-box"> <span id="seconds">00</span> <p>Seconds</p> </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 5. Background Music -->
+    <audio id="birthday-song" loop>
+        <source src="https://github.com/Anandkhuman/song/raw/main/happy-birthday.mp3" type="audio/mpeg">
+    </audio>
+
+    <!-- JavaScript Libraries -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.9.1/gsap.min.js"></script>
+
+    <script>
+        // --- 1. Three.js Starfield Scene ---
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ canvas: document.querySelector('#bg-canvas'), antialias: true });
+        renderer.setPixelRatio(window.devicePixelRatio);
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        camera.position.setZ(30);
+
+        const particleCount = 5000;
+        const positions = new Float32Array(particleCount * 3);
+        for (let i = 0; i < particleCount * 3; i++) { positions[i] = (Math.random() - 0.5) * 500; }
+        const particlesGeometry = new THREE.BufferGeometry();
+        particlesGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+        const particlesMaterial = new THREE.PointsMaterial({ size: 0.1, color: 0xffffff, blending: THREE.AdditiveBlending, transparent: true, opacity: 0.7 });
+        const starField = new THREE.Points(particlesGeometry, particlesMaterial);
+        scene.add(starField);
+
+        function animate() {
+            requestAnimationFrame(animate);
+            starField.rotation.y += 0.0001;
+            starField.rotation.x += 0.00005;
+            renderer.render(scene, camera);
+        }
+        animate();
+
+        window.addEventListener('resize', () => {
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+        });
+
+        // --- 2. Countdown Timer ---
+        const birthday = new Date('2025-08-15T00:00:00');
+        function updateCountdown() {
+            const now = new Date();
+            const diff = birthday - now;
+            if (diff <= 0) {
+                document.getElementById('countdown').innerHTML = "<h2>The day is here! Happy Birthday!</h2>";
+                clearInterval(timerInterval);
+                return;
+            }
+            const d = Math.floor(diff / (1000*60*60*24)), h = Math.floor((diff % (1000*60*60*24))/(1000*60*60)), m = Math.floor((diff % (1000*60*60))/(1000*60)), s = Math.floor((diff % (1000*60))/1000);
+            document.getElementById('days').innerText = String(d).padStart(2,'0');
+            document.getElementById('hours').innerText = String(h).padStart(2,'0');
+            document.getElementById('minutes').innerText = String(m).padStart(2,'0');
+            document.getElementById('seconds').innerText = String(s).padStart(2,'0');
+        }
+        const timerInterval = setInterval(updateCountdown, 1000);
+        updateCountdown();
+
+        // --- 3. Balloons ---
+        const balloonContainer = document.getElementById('balloon-container');
+        const colors = ['pink', 'blue', 'yellow', 'green'];
+        function createBalloon() {
+            const balloon = document.createElement('div');
+            balloon.className = 'balloon ' + colors[Math.floor(Math.random() * colors.length)];
+            const size = Math.random() * 40 + 60;
+            balloon.style.width = `${size}px`;
+            balloon.style.height = `${size * 1.25}px`;
+            balloon.style.left = `${Math.random() * 100}%`;
+            const duration = Math.random() * 8 + 8;
+            balloon.style.animation = `floatUp ${duration}s linear forwards`;
+            balloonContainer.appendChild(balloon);
+            setTimeout(() => balloon.remove(), duration * 1000);
+        }
+        
+        // --- START: NEW ANIMATION FUNCTIONS ---
+
+        // NEW: Confetti Function
+        function launchConfetti() {
+            const confettiContainer = document.getElementById('confetti-container');
+            const confettiCount = 150;
+            const confettiColors = ['#FFD700', '#FF69B4', '#87CEEB', '#98FB98', '#FFFFFF'];
+            for (let i = 0; i < confettiCount; i++) {
+                const confetti = document.createElement('div');
+                confetti.classList.add('confetti');
+                confetti.style.left = `${Math.random() * 100}vw`;
+                confetti.style.backgroundColor = confettiColors[Math.floor(Math.random() * confettiColors.length)];
+                confetti.style.transform = `rotateZ(${Math.random() * 360}deg)`;
+                const duration = Math.random() * 3 + 4; // 4s to 7s
+                const delay = Math.random() * 2;
+                confetti.style.animation = `fall ${duration}s ${delay}s linear forwards`;
+                confettiContainer.appendChild(confetti);
+                setTimeout(() => confetti.remove(), (duration + delay) * 1000);
+            }
+        }
+
+        // NEW: Text Splitting Function
+        function splitTextIntoSpans(selector) {
+            const element = document.querySelector(selector);
+            if(element) {
+                const text = element.textContent;
+                const chars = text.split('').map(char => {
+                    return char === ' ' ? `<span class="char">&nbsp;</span>` : `<span class="char">${char}</span>`;
+                }).join('');
+                element.innerHTML = chars;
+                return element.querySelectorAll('.char');
+            }
+            return [];
+        }
+
+        // --- 4. GSAP Surprise Animation & Music ---
+        const curtain = document.getElementById('curtain');
+        const birthdaySong = document.getElementById('birthday-song');
+        
+        curtain.addEventListener('click', () => {
+            birthdaySong.play();
+
+            // Prepare text for animation
+            const h1Chars = splitTextIntoSpans('#main-heading');
+            const h2Chars = splitTextIntoSpans('#sub-heading');
+
+            const tl = gsap.timeline();
+
+            // Animate curtain away and start effects
+            tl.to(curtain, {
+                opacity: 0,
+                duration: 2,
+                ease: 'power2.inOut',
+                onStart: launchConfetti, // Launch confetti as curtain fades
+                onComplete: () => {
+                    curtain.style.display = 'none';
+                    setInterval(createBalloon, 800); // Start balloons
+                }
+            });
+
+            // Make birthday content block visible for animations
+            tl.to('#birthday-content', { autoAlpha: 1, duration: 0.1 }, "-=1.8");
+            
+            // Animate heading 1 with an explosive effect
+            tl.from(h1Chars, {
+                y: 80,
+                opacity: 0,
+                scale: 1.5,
+                rotationZ: 'random(-180, 180)',
+                duration: 1.5,
+                stagger: 0.03,
+                ease: 'expo.out'
+            }, "-=1.5");
+
+            // Animate heading 2 with a flipping effect
+            tl.from(h2Chars, {
+                y: 50,
+                opacity: 0,
+                rotationX: 90,
+                duration: 1,
+                stagger: 0.02,
+                ease: 'power2.out'
+            }, "-=1.2");
+
+            // Animate the rest of the content with a bouncy pop-in
+            tl.from(['.image-container', '.message', '#countdown'], {
+                scale: 0.5,
+                opacity: 0,
+                duration: 1.2,
+                stagger: 0.2,
+                ease: 'elastic.out(1, 0.75)'
+            }, "-=0.8");
+        }, { once: true }); // Ensure the animation only runs once
+
+    </script>
+</body>
+</html>
