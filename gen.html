@@ -157,6 +157,97 @@
             transform: translateY(-2px);
             box-shadow: 0 5px 15px rgba(255, 215, 0, 0.4);
         }
+
+        /* --- NEW: Styles for Generate Button Animation --- */
+        button.generate-btn {
+            position: relative;
+            overflow: hidden;
+            min-height: 52px; /* Ensure button doesn't collapse */
+        }
+
+        .btn-text {
+            transition: opacity 0.3s ease;
+        }
+
+        button.generate-btn.loading .btn-text,
+        button.generate-btn.success .btn-text {
+            opacity: 0;
+        }
+
+        .loader {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 28px;
+            height: 28px;
+            margin: -14px 0 0 -14px;
+            border: 3px solid rgba(27, 39, 53, 0.2);
+            border-top-color: #1B2735;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0s 0.3s;
+        }
+
+        button.generate-btn.loading .loader {
+            opacity: 1;
+            visibility: visible;
+            transition: opacity 0.3s ease;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .success-checkmark {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: block;
+            stroke-width: 3;
+            stroke: #1B2735;
+            stroke-miterlimit: 10;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            margin: -20px 0 0 -20px;
+            opacity: 0;
+            visibility: hidden;
+            transform: scale(0.8);
+            transition: opacity 0.3s ease, visibility 0s 0.3s, transform 0.3s ease;
+        }
+
+        button.generate-btn.success .success-checkmark {
+            opacity: 1;
+            visibility: visible;
+            transform: scale(1);
+            transition: opacity 0.3s ease, transform 0.3s ease;
+        }
+
+        .checkmark-circle {
+            stroke-dasharray: 166;
+            stroke-dashoffset: 166;
+            stroke-width: 3;
+            stroke-miterlimit: 10;
+            stroke: #1B2735;
+            fill: none;
+            animation: stroke 0.6s cubic-bezier(0.65, 0, 0.45, 1) forwards;
+        }
+
+        .checkmark-tick {
+            transform-origin: 50% 50%;
+            stroke-dasharray: 48;
+            stroke-dashoffset: 48;
+            animation: stroke 0.3s cubic-bezier(0.65, 0, 0.45, 1) 0.8s forwards;
+        }
+
+        @keyframes stroke {
+            100% {
+                stroke-dashoffset: 0;
+            }
+        }
+        /* --- END NEW --- */
         
         #result-container {
             margin-top: 25px;
@@ -298,7 +389,17 @@
                 <button type="button" id="add-message-btn">+ Add Another Message</button>
             </div>
             <!-- ============================================= -->
-            <button class="generate-btn" onclick="generateLink()">Generate Surprise Link</button>
+
+            <!-- ==== MODIFIED: BUTTON HTML FOR ANIMATION ==== -->
+            <button class="generate-btn" onclick="generateLink()">
+                <span class="btn-text">Generate Surprise Link</span>
+                <div class="loader"></div>
+                <svg class="success-checkmark" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 52">
+                    <circle class="checkmark-circle" cx="26" cy="26" r="25" fill="none"/>
+                    <path class="checkmark-tick" fill="none" d="M14.1 27.2l7.1 7.2 16.7-16.8"/>
+                </svg>
+            </button>
+            <!-- ============================================== -->
 
             <!-- ==== RESULT CONTAINER ==== -->
             <div id="result-container">
@@ -434,17 +535,17 @@
             container.appendChild(wrapper);
         }
 
+        // ==== MODIFIED: generateLink function with animation controls ====
         function generateLink() {
+            const generateBtn = document.querySelector('.generate-btn');
             const name = document.getElementById('name').value;
             const birthdate = document.getElementById('birthdate').value;
             
-            // MODIFIED: Collect all image URLs
             const imageInputs = document.querySelectorAll('#images-container .image-input');
             const imageUrls = Array.from(imageInputs)
                                    .map(input => input.value.trim())
-                                   .filter(value => value); // Filters out empty inputs
+                                   .filter(value => value);
 
-            // MODIFIED: Collect all greeting messages
             const greetingInputs = document.querySelectorAll('#greetings-container .greeting-input');
             const greetings = Array.from(greetingInputs)
                                 .map(input => input.value.trim())
@@ -465,22 +566,33 @@
                 return;
             }
 
+            // Start loading animation
+            generateBtn.disabled = true;
+            generateBtn.classList.add('loading');
+
             const nameKey = name.trim().toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
             if(!nameKey) {
                 alert('Please enter a valid name.');
+                // Reset button on validation fail
+                generateBtn.disabled = false;
+                generateBtn.classList.remove('loading');
                 return;
             }
 
             const wishData = {
                 name: name.trim(),
                 birthdate: birthdate,
-                imageUrls: imageUrls, // NEW: Save as array
-                greetings: greetings, // Save as array
+                imageUrls: imageUrls,
+                greetings: greetings,
                 createdAt: firebase.database.ServerValue.TIMESTAMP
             };
 
             database.ref('wishes/' + nameKey).set(wishData)
                 .then(() => {
+                    // Switch to success animation
+                    generateBtn.classList.remove('loading');
+                    generateBtn.classList.add('success');
+
                     const actualUrl = `${window.location.origin}${window.location.pathname}?name=${nameKey}`;
                     const resultContainer = document.getElementById('result-container');
                     const linkElement = document.getElementById('generated-link');
@@ -489,11 +601,18 @@
                     linkElement.href = actualUrl;
                     resultContainer.style.display = 'block';
 
-                    alert('Surprise created successfully!');
+                    // Reset button after a delay
+                    setTimeout(() => {
+                        generateBtn.classList.remove('success');
+                        generateBtn.disabled = false;
+                    }, 2500);
                 })
                 .catch(error => {
                     console.error("Error saving data:", error);
                     alert("An error occurred. Please check your Firebase setup and try again.");
+                    // Reset button on error
+                    generateBtn.classList.remove('loading');
+                    generateBtn.disabled = false;
                 });
         }
 
