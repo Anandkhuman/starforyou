@@ -228,6 +228,12 @@
             </div>
         </div>
     </div>
+
+    <!-- ====== LINK UNDER CONTAINER (Implemented as requested) ====== -->
+    <div style="position: relative; top: -20px; font-size: 0.85rem; color: rgba(255, 255, 255, 0.5);">
+        <p>Inspired by a project from <a href="https://github.com/Anandkhuman" target="_blank" rel="noopener noreferrer" style="color: #FFD700; text-decoration: none;">Anand Khuman</a></p>
+    </div>
+    <!-- ============================================================= -->
     
     <div id="surprise-container">
         <div id="curtain">
@@ -272,14 +278,14 @@
         // --- 1. FIREBASE SETUP ---
         // IMPORTANT: Replace the following with your own Firebase project configuration.
         const firebaseConfig = {
-  apiKey: "AIzaSyAjvI_Vl4trHwZAosaGLdEYQ87jJHeGYwc",
-  authDomain: "studio-ahutj.firebaseapp.com",
-  databaseURL: "https://studio-ahutj-default-rtdb.firebaseio.com",
-  projectId: "studio-ahutj",
-  storageBucket: "studio-ahutj.firebasestorage.app",
-  messagingSenderId: "636752463109",
-  appId: "1:636752463109:web:da78d4100720a39a20a36c"
-};
+          apiKey: "AIzaSyAjvI_Vl4trHwZAosaGLdEYQ87jJHeGYwc",
+          authDomain: "studio-ahutj.firebaseapp.com",
+          databaseURL: "https://studio-ahutj-default-rtdb.firebaseio.com",
+          projectId: "studio-ahutj",
+          storageBucket: "studio-ahutj.firebasestorage.app",
+          messagingSenderId: "636752463109",
+          appId: "1:636752463109:web:da78d4100720a39a20a36c"
+        };
 
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
@@ -291,6 +297,8 @@
 
             if (nameKey) {
                 document.getElementById('generator-container').style.display = 'none';
+                // Also hide the credit link on the surprise page
+                document.querySelector('div[style*="position: relative; top: -20px"]').style.display = 'none';
                 loadWishData(nameKey);
             } else {
                 document.getElementById('surprise-container').style.display = 'none';
