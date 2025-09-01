@@ -64,7 +64,7 @@
         }
 
         .form-group input,
-        .form-group textarea {
+        .greeting-input {
             width: 100%;
             padding: 12px;
             border-radius: 8px;
@@ -76,14 +76,42 @@
         }
 
         .form-group input::placeholder,
-        .form-group textarea::placeholder {
+        .greeting-input::placeholder {
             color: rgba(255, 255, 255, 0.5);
         }
         
-        .form-group textarea {
+        .greeting-input {
             resize: vertical;
             min-height: 100px;
+            margin-bottom: 10px; /* Space between multiple message boxes */
         }
+        
+        #greetings-container .greeting-input:last-child {
+            margin-bottom: 0;
+        }
+        
+        /* --- NEW: Style for the "Add Message" button --- */
+        #add-message-btn {
+            display: inline-block;
+            width: auto;
+            background: transparent;
+            border: 1px dashed rgba(255, 215, 0, 0.6);
+            color: rgba(255, 215, 0, 0.8);
+            padding: 8px 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-top: 10px;
+            font-size: 0.9rem;
+            transition: background 0.2s, color 0.2s, border-color 0.2s;
+        }
+
+        #add-message-btn:hover {
+            background: rgba(255, 215, 0, 0.1);
+            color: #FFD700;
+            border-color: #FFD700;
+        }
+        /* --- END NEW --- */
+
 
         button.generate-btn {
             width: 100%;
@@ -96,6 +124,7 @@
             font-weight: bold;
             cursor: pointer;
             transition: transform 0.2s, box-shadow 0.2s;
+            margin-top: 10px; /* Added margin for spacing */
         }
 
         button.generate-btn:hover {
@@ -263,10 +292,15 @@
                 <label for="imageUrl">Image Link</label>
                 <input type="url" id="imageUrl" placeholder="https://example.com/photo.jpg" required>
             </div>
+            <!-- ==== MODIFIED: GREETING MESSAGE SECTION ==== -->
             <div class="form-group">
-                <label for="greeting">Your Greeting Message</label>
-                <textarea id="greeting" placeholder="May your day be as bright as the stars..."></textarea>
+                <label>Your Greeting Messages</label>
+                <div id="greetings-container">
+                    <textarea class="greeting-input" placeholder="Message 1: May your day be as bright as the stars..."></textarea>
+                </div>
+                <button type="button" id="add-message-btn" onclick="addMessageBox()">+ Add Another Message</button>
             </div>
+            <!-- ============================================= -->
             <button class="generate-btn" onclick="generateLink()">Generate Surprise Link</button>
 
             <!-- ==== NEW RESULT CONTAINER WITH COPY ICON ==== -->
@@ -304,8 +338,8 @@
         <div id="balloon-container"></div>
         <div id="confetti-container"></div>
         <div id="birthday-content">
-            <h1 id="main-heading">Happy Birthday Name</h1>
-            <h2 id="sub-heading">Name | 1 Jan 2025</h2>
+            <h1 id="main-heading">Happy Birthday</h1>
+            <h2 id="sub-heading">Name</h2>
             <div class="image-container">
                 <img id="person-image" src="" alt="A special photo">
             </div>
@@ -355,7 +389,6 @@
 
             if (nameKey) {
                 document.getElementById('generator-container').style.display = 'none';
-                // Also hide the credit link on the surprise page
                 document.querySelector('div[style*="position: relative; top: -20px"]').style.display = 'none';
                 loadWishData(nameKey);
             } else {
@@ -364,14 +397,33 @@
         });
         
         // --- 3. GENERATOR FUNCTIONS ---
+        // NEW: Function to add a new message text box
+        function addMessageBox() {
+            const container = document.getElementById('greetings-container');
+            const newTextArea = document.createElement('textarea');
+            newTextArea.className = 'greeting-input';
+            newTextArea.placeholder = `Message ${container.children.length + 1}: Write another special message...`;
+            container.appendChild(newTextArea);
+        }
+
         function generateLink() {
             const name = document.getElementById('name').value;
             const birthdate = document.getElementById('birthdate').value;
             const imageUrl = document.getElementById('imageUrl').value;
-            const greeting = document.getElementById('greeting').value;
+            
+            // MODIFIED: Collect all greeting messages
+            const greetingInputs = document.querySelectorAll('#greetings-container .greeting-input');
+            const greetings = Array.from(greetingInputs)
+                                .map(input => input.value.trim())
+                                .filter(value => value); // Filters out any empty message boxes
 
             if (!name || !birthdate || !imageUrl) {
                 alert('Please fill in the Name, Birthday Date, and Image Link fields.');
+                return;
+            }
+            
+            if (greetings.length === 0) {
+                alert('Please write at least one greeting message.');
                 return;
             }
 
@@ -385,7 +437,7 @@
                 name: name.trim(),
                 birthdate: birthdate,
                 imageUrl: imageUrl,
-                greeting: greeting || "May your day be filled with joy and wonder!",
+                greetings: greetings, // Save messages as an array
                 createdAt: firebase.database.ServerValue.TIMESTAMP
             };
 
@@ -408,7 +460,6 @@
                 });
         }
 
-        // --- NEW: FUNCTION TO COPY LINK TO CLIPBOARD ---
         function copyLinkToClipboard() {
             const linkElement = document.getElementById('generated-link');
             const linkToCopy = linkElement.href;
@@ -417,7 +468,7 @@
             
             if (!navigator.clipboard) {
                 feedbackElement.textContent = 'Clipboard access not available.';
-                feedbackElement.style.color = '#FF6347'; // Error color
+                feedbackElement.style.color = '#FF6347';
                 feedbackElement.style.opacity = '1';
                 setTimeout(() => { feedbackElement.style.opacity = '0'; feedbackElement.style.color = '#98fb98'; }, 3000);
                 return;
@@ -425,7 +476,7 @@
 
             navigator.clipboard.writeText(linkToCopy).then(() => {
                 feedbackElement.textContent = 'Copied to clipboard!';
-                feedbackElement.style.color = '#98fb98'; // Success color
+                feedbackElement.style.color = '#98fb98';
                 feedbackElement.style.opacity = '1';
                 
                 const originalIcon = copyBtn.innerHTML;
@@ -472,7 +523,7 @@
 
                     populateSurprisePage(data);
                     document.getElementById('surprise-container').style.display = 'block';
-                    initializeSurpriseAnimations(data.birthdate);
+                    initializeSurpriseAnimations(data); // Pass the whole data object
 
                 } else {
                     showMessage('Not Found', 'We couldn\'t find a surprise with this link. It might have been deleted or the link is incorrect.');
@@ -484,20 +535,59 @@
         }
 
         function populateSurprisePage(data) {
-            const formattedDate = new Date(data.birthdate + 'T00:00:00').toLocaleDateString('en-US', {
-                day: 'numeric', month: 'short', year: 'numeric'
-            });
-
             document.title = `A Special Surprise for ${data.name}!`;
-            document.getElementById('main-heading').textContent = `Happy Birthday ${data.name}!`;
-            document.getElementById('sub-heading').textContent = `${data.name} | ${formattedDate}`;
+            // MODIFIED: Set Title and Name separately
+            document.getElementById('main-heading').textContent = `Happy Birthday`;
+            document.getElementById('sub-heading').textContent = data.name;
             document.getElementById('person-image').src = data.imageUrl;
             document.getElementById('person-image').alt = `A photo of ${data.name}`;
-            document.querySelector('.message').textContent = data.greeting;
+            
+            // Handle both old (greeting string) and new (greetings array) formats
+            const messages = data.greetings || (data.greeting ? [data.greeting] : []);
+            const messageElement = document.querySelector('.message');
+            
+            if (messages.length > 0) {
+                messageElement.textContent = messages[0]; // Display the first message initially
+            } else {
+                messageElement.textContent = "Wishing you a day as special as you are!"; // Fallback
+            }
+        }
+
+        // NEW: Function to cycle through messages with animation
+        function cycleMessages(messages) {
+            const messageElement = document.querySelector('.message');
+            let currentIndex = 0;
+
+            function showNextMessage() {
+                // Fade out the current message
+                gsap.to(messageElement, {
+                    opacity: 0,
+                    y: -15, // Move up on exit
+                    duration: 0.7,
+                    ease: 'power2.in',
+                    onComplete: () => {
+                        // Change text when invisible and loop back to the start if needed
+                        currentIndex = (currentIndex + 1) % messages.length;
+                        messageElement.textContent = messages[currentIndex];
+                        
+                        // Fade in the new message
+                        gsap.fromTo(messageElement, 
+                            { opacity: 0, y: 15 }, // Start from below
+                            { opacity: 1, y: 0, duration: 0.7, ease: 'power2.out' }
+                        );
+                    }
+                });
+            }
+            // Set an interval to switch messages (e.g., every 6.5 seconds)
+            setInterval(showNextMessage, 6500);
         }
 
         // --- 5. ANIMATION & INTERACTIVITY LOGIC ---
-        function initializeSurpriseAnimations(birthdayDateString) {
+        function initializeSurpriseAnimations(data) {
+            const birthdayDateString = data.birthdate;
+            // Handle both data formats for messages
+            const greetings = data.greetings || (data.greeting ? [data.greeting] : []);
+            
             const scene = new THREE.Scene();
             const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
             const renderer = new THREE.WebGLRenderer({ canvas: document.querySelector('#bg-canvas'), antialias: true });
@@ -607,7 +697,13 @@
                 tl.to('#birthday-content', { autoAlpha: 1, duration: 0.1 }, "-=1.8");
                 tl.from(h1Chars, { y: 80, opacity: 0, scale: 1.5, rotationZ: 'random(-180, 180)', duration: 1.5, stagger: 0.03, ease: 'expo.out' }, "-=1.5");
                 tl.from(h2Chars, { y: 50, opacity: 0, rotationX: 90, duration: 1, stagger: 0.02, ease: 'power2.out' }, "-=1.2");
-                tl.from(['.image-container', '.message', '#countdown'], { scale: 0.5, opacity: 0, duration: 1.2, stagger: 0.2, ease: 'elastic.out(1, 0.75)' }, "-=0.8");
+                tl.from(['.image-container', '.message', '#countdown'], { scale: 0.5, opacity: 0, duration: 1.2, stagger: 0.2, ease: 'elastic.out(1, 0.75)' }, "-=0.8")
+                  .add(() => {
+                      // After initial animations, start cycling messages if there's more than one
+                      if (greetings && greetings.length > 1) {
+                          cycleMessages(greetings);
+                      }
+                  });
             }, { once: true });
         }
     </script>
