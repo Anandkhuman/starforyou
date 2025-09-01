@@ -64,7 +64,8 @@
         }
 
         .form-group input,
-        .greeting-input {
+        .greeting-input,
+        .image-input { /* NEW: Added image-input */
             width: 100%;
             padding: 12px;
             border-radius: 8px;
@@ -76,22 +77,48 @@
         }
 
         .form-group input::placeholder,
-        .greeting-input::placeholder {
+        .greeting-input::placeholder,
+        .image-input::placeholder { /* NEW: Added image-input */
             color: rgba(255, 255, 255, 0.5);
         }
         
         .greeting-input {
             resize: vertical;
             min-height: 100px;
-            margin-bottom: 10px; /* Space between multiple message boxes */
         }
-        
-        #greetings-container .greeting-input:last-child {
+
+        /* --- NEW: Styles for dynamic input fields and remove button --- */
+        .input-wrapper {
+            position: relative;
+            margin-bottom: 10px; /* Space between multiple inputs */
+        }
+        #greetings-container .input-wrapper:last-child,
+        #images-container .input-wrapper:last-child {
             margin-bottom: 0;
         }
+        .remove-btn {
+            position: absolute;
+            top: 50%;
+            right: 12px;
+            transform: translateY(-50%);
+            background: transparent;
+            border: none;
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 1.5rem;
+            font-weight: bold;
+            line-height: 1;
+            padding: 0 5px;
+            cursor: pointer;
+            transition: color 0.2s;
+            z-index: 2;
+        }
+        .remove-btn:hover {
+            color: #FF6347; /* Reddish color on hover */
+        }
+        /* --- END NEW --- */
         
-        /* --- NEW: Style for the "Add Message" button --- */
-        #add-message-btn {
+        #add-message-btn,
+        #add-image-btn { /* NEW: Grouped styles */
             display: inline-block;
             width: auto;
             background: transparent;
@@ -105,13 +132,12 @@
             transition: background 0.2s, color 0.2s, border-color 0.2s;
         }
 
-        #add-message-btn:hover {
+        #add-message-btn:hover,
+        #add-image-btn:hover { /* NEW: Grouped styles */
             background: rgba(255, 215, 0, 0.1);
             color: #FFD700;
             border-color: #FFD700;
         }
-        /* --- END NEW --- */
-
 
         button.generate-btn {
             width: 100%;
@@ -124,7 +150,7 @@
             font-weight: bold;
             cursor: pointer;
             transition: transform 0.2s, box-shadow 0.2s;
-            margin-top: 10px; /* Added margin for spacing */
+            margin-top: 10px;
         }
 
         button.generate-btn:hover {
@@ -132,11 +158,10 @@
             box-shadow: 0 5px 15px rgba(255, 215, 0, 0.4);
         }
         
-        /* --- STYLES FOR NEW RESULT CONTAINER --- */
         #result-container {
             margin-top: 25px;
             text-align: left;
-            display: none; /* Hidden by default */
+            display: none;
         }
         
         #result-container p {
@@ -203,75 +228,37 @@
         }
 
         /* --- STYLES FOR SURPRISE PAGE (MOBILE FIRST) --- */
-        #surprise-container {
-            display: none; /* Hidden by default */
-            overflow: hidden; /* Prevent scrollbars */
-            height: 100vh;
-            width: 100vw;
-            position: fixed;
-            top: 0;
-            left: 0;
-        }
-
-        #bg-canvas, #balloon-container, #confetti-container {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-            z-index: -1;
-            overflow: hidden;
-        }
+        #surprise-container { display: none; overflow: hidden; height: 100vh; width: 100vw; position: fixed; top: 0; left: 0; }
+        #bg-canvas, #balloon-container, #confetti-container { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: -1; overflow: hidden; }
         #balloon-container { z-index: 0; }
         #confetti-container { z-index: 99; }
-
         .balloon { position: absolute; bottom: -200px; width: 80px; height: 100px; border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%; background-size: cover; opacity: 0.8; }
         .balloon::after { content: ''; position: absolute; bottom: -10px; left: 50%; transform: translateX(-50%); width: 0; height: 0; border-left: 5px solid transparent; border-right: 5px solid transparent; border-bottom: 10px solid; }
-        .balloon.pink { background-image: radial-gradient(circle at 30% 30%, #ffc0cb, #e75480); }
-        .balloon.pink::after { border-bottom-color: #e75480; }
-        .balloon.blue { background-image: radial-gradient(circle at 30% 30%, #87ceeb, #4682b4); }
-        .balloon.blue::after { border-bottom-color: #4682b4; }
-        .balloon.yellow { background-image: radial-gradient(circle at 30% 30%, #fffacd, #ffd700); }
-        .balloon.yellow::after { border-bottom-color: #ffd700; }
-        .balloon.green { background-image: radial-gradient(circle at 30% 30%, #98fb98, #3cb371); }
-        .balloon.green::after { border-bottom-color: #3cb371; }
+        .balloon.pink { background-image: radial-gradient(circle at 30% 30%, #ffc0cb, #e75480); } .balloon.pink::after { border-bottom-color: #e75480; } .balloon.blue { background-image: radial-gradient(circle at 30% 30%, #87ceeb, #4682b4); } .balloon.blue::after { border-bottom-color: #4682b4; } .balloon.yellow { background-image: radial-gradient(circle at 30% 30%, #fffacd, #ffd700); } .balloon.yellow::after { border-bottom-color: #ffd700; } .balloon.green { background-image: radial-gradient(circle at 30% 30%, #98fb98, #3cb371); } .balloon.green::after { border-bottom-color: #3cb371; }
         @keyframes floatUp { 0% { transform: translateY(0) rotate(0deg); opacity: 0.8; } 100% { transform: translateY(-150vh) rotate(360deg); opacity: 0; } }
-
         .confetti { position: absolute; width: 10px; height: 15px; top: -20px; opacity: 0; }
         @keyframes fall { 0% { transform: translateY(0vh) rotateZ(0deg); opacity: 1; } 100% { transform: translateY(110vh) rotateZ(720deg); opacity: 0; } }
-
         #curtain { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #090A0F; z-index: 100; display: flex; justify-content: center; align-items: center; cursor: pointer; }
         .prompt { font-size: 1.5rem; color: rgba(255, 255, 255, 0.7); }
         .prompt svg { width: 80px; height: 80px; margin-bottom: 20px; fill: #FFD700; animation: pulse 2s infinite ease-in-out; }
         @keyframes pulse { 0%, 100% { transform: scale(1); filter: drop-shadow(0 0 5px #FFD700); } 50% { transform: scale(1.1); filter: drop-shadow(0 0 20px #FFD700); } }
-
         #birthday-content { display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100vh; padding: 20px; position: relative; z-index: 1; visibility: hidden; }
         h1 span.char, h2 span.char { display: inline-block; }
-        #birthday-content h1 { font-family: 'Playfair Display', serif; font-size: clamp(2rem, 8vw, 5rem); /* MODIFIED: Reduced minimum size */ font-weight: 700; color: #fff; text-shadow: 0 0 10px rgba(255, 255, 255, 0.5), 0 0 20px rgba(255, 215, 0, 0.7); margin-bottom: 10px; }
-        #birthday-content h2 { font-family: 'Playfair Display', serif; font-size: clamp(1.2rem, 4vw, 2.5rem); /* MODIFIED: Reduced minimum size */ color: #FFD700; text-shadow: 0 0 15px #FFD700; margin-bottom: 30px; }
+        #birthday-content h1 { font-family: 'Playfair Display', serif; font-size: clamp(2rem, 8vw, 5rem); font-weight: 700; color: #fff; text-shadow: 0 0 10px rgba(255, 255, 255, 0.5), 0 0 20px rgba(255, 215, 0, 0.7); margin-bottom: 10px; }
+        #birthday-content h2 { font-family: 'Playfair Display', serif; font-size: clamp(1.2rem, 4vw, 2.5rem); color: #FFD700; text-shadow: 0 0 15px #FFD700; margin-bottom: 30px; }
         .image-container { margin: 0 0 30px 0; position: relative; }
         .message { font-size: clamp(1rem, 2.5vw, 1.3rem); max-width: 600px; line-height: 1.8; color: rgba(255, 255, 255, 0.85); }
         @keyframes glow-pulse { 0%, 100% { box-shadow: 0 0 15px rgba(255, 215, 0, 0.6), 0 0 25px rgba(255, 215, 0, 0.4); } 50% { box-shadow: 0 0 25px rgba(255, 215, 0, 0.8), 0 0 40px rgba(255, 215, 0, 0.6); } }
-        
-        #person-image { width: 100px; height: 100px; /* MODIFIED: Reduced size */ border-radius: 50%; object-fit: cover; border: 3px solid #FFD700; animation: glow-pulse 3s infinite ease-in-out; }
+        #person-image { width: 100px; height: 100px; border-radius: 50%; object-fit: cover; border: 3px solid #FFD700; animation: glow-pulse 3s infinite ease-in-out; }
         #countdown { margin-top: 40px; display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
-        .time-box { background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.2); padding: 8px; /* MODIFIED: Reduced padding */ border-radius: 10px; backdrop-filter: blur(5px); min-width: 65px; /* MODIFIED: Reduced width */ }
-        .time-box span { display: block; font-size: 1.5rem; /* MODIFIED: Reduced font size */ font-weight: bold; }
+        .time-box { background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.2); padding: 8px; border-radius: 10px; backdrop-filter: blur(5px); min-width: 65px; }
+        .time-box span { display: block; font-size: 1.5rem; font-weight: bold; }
         .time-box p { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1px; color: rgba(255, 255, 255, 0.7); }
-
         #message-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #090A0F; z-index: 200; display: none; flex-direction: column; justify-content: center; align-items: center; padding: 20px; }
         #message-overlay h1 { font-size: 2.5rem; color: #FFD700; }
         #message-overlay p { font-size: 1.1rem; color: rgba(255, 255, 255, 0.8); max-width: 500px; }
-
         @media (min-width: 481px) {
-            .form-wrapper { padding: 40px; }
-            .form-wrapper h1 { font-size: 2.5rem; }
-            #person-image { width: 150px; height: 150px; }
-            #countdown { gap: 20px; }
-            .time-box { min-width: 90px; padding: 15px 20px; }
-            .time-box span { font-size: 2.5rem; }
-            .time-box p { font-size: 0.8rem; }
+            .form-wrapper { padding: 40px; } .form-wrapper h1 { font-size: 2.5rem; } #person-image { width: 150px; height: 150px; } #countdown { gap: 20px; } .time-box { min-width: 90px; padding: 15px 20px; } .time-box span { font-size: 2.5rem; } .time-box p { font-size: 0.8rem; }
         }
     </style>
 </head>
@@ -288,44 +275,49 @@
                 <label for="birthdate">Birthday Date</label>
                 <input type="date" id="birthdate" required>
             </div>
+            <!-- ==== MODIFIED: IMAGE SECTION ==== -->
             <div class="form-group">
-                <label for="imageUrl">Image Link</label>
-                <input type="url" id="imageUrl" placeholder="https://example.com/photo.jpg" required>
+                <label>Image Links</label>
+                <div id="images-container">
+                    <div class="input-wrapper">
+                         <input type="url" class="image-input" placeholder="Image Link 1: https://..." required>
+                    </div>
+                </div>
+                <button type="button" id="add-image-btn">+ Add Another Image</button>
             </div>
+            <!-- ================================ -->
+
             <!-- ==== MODIFIED: GREETING MESSAGE SECTION ==== -->
             <div class="form-group">
                 <label>Your Greeting Messages</label>
                 <div id="greetings-container">
-                    <textarea class="greeting-input" placeholder="Message 1: May your day be as bright as the stars..."></textarea>
+                    <div class="input-wrapper">
+                         <textarea class="greeting-input" placeholder="Message 1: May your day be as bright as the stars..."></textarea>
+                    </div>
                 </div>
-                <button type="button" id="add-message-btn" onclick="addMessageBox()">+ Add Another Message</button>
+                <button type="button" id="add-message-btn">+ Add Another Message</button>
             </div>
             <!-- ============================================= -->
             <button class="generate-btn" onclick="generateLink()">Generate Surprise Link</button>
 
-            <!-- ==== NEW RESULT CONTAINER WITH COPY ICON ==== -->
+            <!-- ==== RESULT CONTAINER ==== -->
             <div id="result-container">
                 <p>Success! Share this link:</p>
                 <div class="link-wrapper">
                     <a id="generated-link" href="#" target="_blank" rel="noopener noreferrer"></a>
                     <button id="copy-btn" title="Copy to clipboard" onclick="copyLinkToClipboard()">
-                        <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 0 24 24" width="24px" fill="#FFD700">
-                            <path d="M0 0h24v24H0V0z" fill="none"/>
-                            <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-5zm0 16H8V7h11v14z"/>
-                        </svg>
+                        <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 0 24 24" width="24px" fill="#FFD700"><path d="M0 0h24v24H0V0z" fill="none"/><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-5zm0 16H8V7h11v14z"/></svg>
                     </button>
                 </div>
                 <span id="copy-feedback"></span>
             </div>
-            <!-- ============================================== -->
+            <!-- ========================= -->
         </div>
     </div>
 
-    <!-- ====== LINK UNDER CONTAINER (Implemented as requested) ====== -->
     <div style="position: relative; top: -20px; font-size: 0.85rem; color: rgba(255, 255, 255, 0.5);">
         <p>Inspired by a project from <a href="https://github.com/Anandkhuman" target="_blank" rel="noopener noreferrer" style="color: #FFD700; text-decoration: none;">Anand Khuman</a></p>
     </div>
-    <!-- ============================================================= -->
     
     <div id="surprise-container">
         <div id="curtain">
@@ -368,7 +360,6 @@
 
     <script>
         // --- 1. FIREBASE SETUP ---
-        // IMPORTANT: Replace the following with your own Firebase project configuration.
         const firebaseConfig = {
           apiKey: "AIzaSyAjvI_Vl4trHwZAosaGLdEYQ87jJHeGYwc",
           authDomain: "studio-ahutj.firebaseapp.com",
@@ -378,11 +369,10 @@
           messagingSenderId: "636752463109",
           appId: "1:636752463109:web:da78d4100720a39a20a36c"
         };
-
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
 
-        // --- 2. PAGE ROUTING LOGIC ---
+        // --- 2. PAGE ROUTING & EVENT LISTENERS ---
         document.addEventListener('DOMContentLoaded', () => {
             const urlParams = new URLSearchParams(window.location.search);
             const nameKey = urlParams.get('name');
@@ -393,32 +383,80 @@
                 loadWishData(nameKey);
             } else {
                 document.getElementById('surprise-container').style.display = 'none';
+                // Add event listeners for generator buttons
+                document.getElementById('add-message-btn').addEventListener('click', addMessageBox);
+                document.getElementById('add-image-btn').addEventListener('click', addImageBox);
             }
         });
         
         // --- 3. GENERATOR FUNCTIONS ---
-        // NEW: Function to add a new message text box
         function addMessageBox() {
             const container = document.getElementById('greetings-container');
+            const wrapper = document.createElement('div');
+            wrapper.className = 'input-wrapper';
+            
             const newTextArea = document.createElement('textarea');
             newTextArea.className = 'greeting-input';
             newTextArea.placeholder = `Message ${container.children.length + 1}: Write another special message...`;
-            container.appendChild(newTextArea);
+            
+            const removeBtn = document.createElement('button');
+            removeBtn.type = 'button';
+            removeBtn.className = 'remove-btn';
+            removeBtn.innerHTML = '&times;'; // The 'x' icon
+            removeBtn.title = 'Remove message';
+            removeBtn.onclick = () => wrapper.remove();
+            
+            wrapper.appendChild(newTextArea);
+            wrapper.appendChild(removeBtn);
+            container.appendChild(wrapper);
+        }
+
+        function addImageBox() {
+            const container = document.getElementById('images-container');
+            const wrapper = document.createElement('div');
+            wrapper.className = 'input-wrapper';
+            
+            const newInput = document.createElement('input');
+            newInput.type = 'url';
+            newInput.className = 'image-input';
+            newInput.placeholder = `Image Link ${container.children.length + 1}: https://...`;
+            newInput.required = true;
+
+            const removeBtn = document.createElement('button');
+            removeBtn.type = 'button';
+            removeBtn.className = 'remove-btn';
+            removeBtn.innerHTML = '&times;';
+            removeBtn.title = 'Remove image';
+            removeBtn.onclick = () => wrapper.remove();
+
+            wrapper.appendChild(newInput);
+            wrapper.appendChild(removeBtn);
+            container.appendChild(wrapper);
         }
 
         function generateLink() {
             const name = document.getElementById('name').value;
             const birthdate = document.getElementById('birthdate').value;
-            const imageUrl = document.getElementById('imageUrl').value;
             
+            // MODIFIED: Collect all image URLs
+            const imageInputs = document.querySelectorAll('#images-container .image-input');
+            const imageUrls = Array.from(imageInputs)
+                                   .map(input => input.value.trim())
+                                   .filter(value => value); // Filters out empty inputs
+
             // MODIFIED: Collect all greeting messages
             const greetingInputs = document.querySelectorAll('#greetings-container .greeting-input');
             const greetings = Array.from(greetingInputs)
                                 .map(input => input.value.trim())
-                                .filter(value => value); // Filters out any empty message boxes
+                                .filter(value => value);
 
-            if (!name || !birthdate || !imageUrl) {
-                alert('Please fill in the Name, Birthday Date, and Image Link fields.');
+            if (!name || !birthdate) {
+                alert('Please fill in the Name and Birthday Date fields.');
+                return;
+            }
+
+            if (imageUrls.length === 0) {
+                alert('Please provide at least one image link.');
                 return;
             }
             
@@ -436,15 +474,14 @@
             const wishData = {
                 name: name.trim(),
                 birthdate: birthdate,
-                imageUrl: imageUrl,
-                greetings: greetings, // Save messages as an array
+                imageUrls: imageUrls, // NEW: Save as array
+                greetings: greetings, // Save as array
                 createdAt: firebase.database.ServerValue.TIMESTAMP
             };
 
             database.ref('wishes/' + nameKey).set(wishData)
                 .then(() => {
                     const actualUrl = `${window.location.origin}${window.location.pathname}?name=${nameKey}`;
-
                     const resultContainer = document.getElementById('result-container');
                     const linkElement = document.getElementById('generated-link');
                     
@@ -466,19 +503,9 @@
             const feedbackElement = document.getElementById('copy-feedback');
             const copyBtn = document.getElementById('copy-btn');
             
-            if (!navigator.clipboard) {
-                feedbackElement.textContent = 'Clipboard access not available.';
-                feedbackElement.style.color = '#FF6347';
-                feedbackElement.style.opacity = '1';
-                setTimeout(() => { feedbackElement.style.opacity = '0'; feedbackElement.style.color = '#98fb98'; }, 3000);
-                return;
-            }
-
             navigator.clipboard.writeText(linkToCopy).then(() => {
                 feedbackElement.textContent = 'Copied to clipboard!';
-                feedbackElement.style.color = '#98fb98';
                 feedbackElement.style.opacity = '1';
-                
                 const originalIcon = copyBtn.innerHTML;
                 copyBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 0 24 24" width="24px" fill="#98fb98"><path d="M0 0h24v24H0V0z" fill="none"/><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/></svg>`;
                 copyBtn.disabled = true;
@@ -488,14 +515,8 @@
                     copyBtn.innerHTML = originalIcon;
                     copyBtn.disabled = false;
                 }, 2000);
-
             }).catch(err => {
-                feedbackElement.textContent = 'Failed to copy link.';
-                feedbackElement.style.color = '#FF6347';
-                feedbackElement.style.opacity = '1';
                 console.error('Could not copy text: ', err);
-
-                setTimeout(() => { feedbackElement.style.opacity = '0'; feedbackElement.style.color = '#98fb98'; }, 3000);
             });
         }
         
@@ -514,17 +535,14 @@
                 if (snapshot.exists()) {
                     const data = snapshot.val();
                     const twoDaysInMillis = 2 * 24 * 60 * 60 * 1000;
-                    
                     if (Date.now() - data.createdAt > twoDaysInMillis) {
                         showMessage('Oh no!', 'This surprise link has expired. Links are only valid for 2 days.');
                         wishRef.remove();
                         return;
                     }
-
                     populateSurprisePage(data);
                     document.getElementById('surprise-container').style.display = 'block';
-                    initializeSurpriseAnimations(data); // Pass the whole data object
-
+                    initializeSurpriseAnimations(data);
                 } else {
                     showMessage('Not Found', 'We couldn\'t find a surprise with this link. It might have been deleted or the link is incorrect.');
                 }
@@ -536,58 +554,59 @@
 
         function populateSurprisePage(data) {
             document.title = `A Special Surprise for ${data.name}!`;
-            // MODIFIED: Set Title and Name separately
             document.getElementById('main-heading').textContent = `Happy Birthday`;
             document.getElementById('sub-heading').textContent = data.name;
-            document.getElementById('person-image').src = data.imageUrl;
+            
+            // Handle old and new image formats
+            const images = data.imageUrls || (data.imageUrl ? [data.imageUrl] : []);
+            if (images.length > 0) {
+                document.getElementById('person-image').src = images[0];
+            }
             document.getElementById('person-image').alt = `A photo of ${data.name}`;
             
-            // Handle both old (greeting string) and new (greetings array) formats
+            // Handle old and new greeting formats
             const messages = data.greetings || (data.greeting ? [data.greeting] : []);
             const messageElement = document.querySelector('.message');
-            
             if (messages.length > 0) {
-                messageElement.textContent = messages[0]; // Display the first message initially
+                messageElement.textContent = messages[0];
             } else {
-                messageElement.textContent = "Wishing you a day as special as you are!"; // Fallback
+                messageElement.textContent = "Wishing you a day as special as you are!";
             }
         }
 
-        // NEW: Function to cycle through messages with animation
         function cycleMessages(messages) {
             const messageElement = document.querySelector('.message');
             let currentIndex = 0;
-
             function showNextMessage() {
-                // Fade out the current message
-                gsap.to(messageElement, {
-                    opacity: 0,
-                    y: -15, // Move up on exit
-                    duration: 0.7,
-                    ease: 'power2.in',
-                    onComplete: () => {
-                        // Change text when invisible and loop back to the start if needed
-                        currentIndex = (currentIndex + 1) % messages.length;
-                        messageElement.textContent = messages[currentIndex];
-                        
-                        // Fade in the new message
-                        gsap.fromTo(messageElement, 
-                            { opacity: 0, y: 15 }, // Start from below
-                            { opacity: 1, y: 0, duration: 0.7, ease: 'power2.out' }
-                        );
-                    }
-                });
+                gsap.to(messageElement, { opacity: 0, y: -15, duration: 0.7, ease: 'power2.in', onComplete: () => {
+                    currentIndex = (currentIndex + 1) % messages.length;
+                    messageElement.textContent = messages[currentIndex];
+                    gsap.fromTo(messageElement, { opacity: 0, y: 15 }, { opacity: 1, y: 0, duration: 0.7, ease: 'power2.out' });
+                }});
             }
-            // Set an interval to switch messages (e.g., every 6.5 seconds)
             setInterval(showNextMessage, 6500);
+        }
+
+        // NEW: Function to cycle through images with animation
+        function cycleImages(imageUrls) {
+            const imageElement = document.getElementById('person-image');
+            let currentIndex = 0;
+            function showNextImage() {
+                gsap.to(imageElement, { opacity: 0, scale: 0.95, duration: 0.7, ease: 'power2.in', onComplete: () => {
+                    currentIndex = (currentIndex + 1) % imageUrls.length;
+                    imageElement.src = imageUrls[currentIndex];
+                    gsap.to(imageElement, { opacity: 1, scale: 1, duration: 0.7, ease: 'power2.out' });
+                }});
+            }
+            setInterval(showNextImage, 8000); // Cycle slightly slower than messages
         }
 
         // --- 5. ANIMATION & INTERACTIVITY LOGIC ---
         function initializeSurpriseAnimations(data) {
             const birthdayDateString = data.birthdate;
-            // Handle both data formats for messages
             const greetings = data.greetings || (data.greeting ? [data.greeting] : []);
-            
+            const imageUrls = data.imageUrls || (data.imageUrl ? [data.imageUrl] : []);
+
             const scene = new THREE.Scene();
             const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
             const renderer = new THREE.WebGLRenderer({ canvas: document.querySelector('#bg-canvas'), antialias: true });
@@ -602,18 +621,9 @@
             const particlesMaterial = new THREE.PointsMaterial({ size: 0.1, color: 0xffffff, blending: THREE.AdditiveBlending, transparent: true, opacity: 0.7 });
             const starField = new THREE.Points(particlesGeometry, particlesMaterial);
             scene.add(starField);
-            function animateStars() {
-                requestAnimationFrame(animateStars);
-                starField.rotation.y += 0.0001;
-                starField.rotation.x += 0.00005;
-                renderer.render(scene, camera);
-            }
+            function animateStars() { requestAnimationFrame(animateStars); starField.rotation.y += 0.0001; starField.rotation.x += 0.00005; renderer.render(scene, camera); }
             animateStars();
-            window.addEventListener('resize', () => {
-                renderer.setSize(window.innerWidth, window.innerHeight);
-                camera.aspect = window.innerWidth / window.innerHeight;
-                camera.updateProjectionMatrix();
-            });
+            window.addEventListener('resize', () => { renderer.setSize(window.innerWidth, window.innerHeight); camera.aspect = window.innerWidth / window.innerHeight; camera.updateProjectionMatrix(); });
 
             let timerInterval;
             function setupCountdown() {
@@ -627,10 +637,7 @@
                         return;
                     }
                     const d = Math.floor(diff / (1000*60*60*24)), h = Math.floor((diff % (1000*60*60*24))/(1000*60*60)), m = Math.floor((diff % (1000*60*60))/(1000*60)), s = Math.floor((diff % (1000*60))/1000);
-                    document.getElementById('days').innerText = String(d).padStart(2,'0');
-                    document.getElementById('hours').innerText = String(h).padStart(2,'0');
-                    document.getElementById('minutes').innerText = String(m).padStart(2,'0');
-                    document.getElementById('seconds').innerText = String(s).padStart(2,'0');
+                    document.getElementById('days').innerText = String(d).padStart(2,'0'); document.getElementById('hours').innerText = String(h).padStart(2,'0'); document.getElementById('minutes').innerText = String(m).padStart(2,'0'); document.getElementById('seconds').innerText = String(s).padStart(2,'0');
                 }
                 timerInterval = setInterval(updateCountdown, 1000);
                 updateCountdown();
@@ -640,45 +647,18 @@
             const balloonContainer = document.getElementById('balloon-container');
             const colors = ['pink', 'blue', 'yellow', 'green'];
             function createBalloon() {
-                const balloon = document.createElement('div');
-                balloon.className = 'balloon ' + colors[Math.floor(Math.random() * colors.length)];
-                const size = Math.random() * 40 + 60;
-                balloon.style.width = `${size}px`;
-                balloon.style.height = `${size * 1.25}px`;
-                balloon.style.left = `${Math.random() * 100}%`;
-                const duration = Math.random() * 8 + 8;
-                balloon.style.animation = `floatUp ${duration}s linear forwards`;
-                balloonContainer.appendChild(balloon);
-                setTimeout(() => balloon.remove(), duration * 1000);
+                const balloon = document.createElement('div'); balloon.className = 'balloon ' + colors[Math.floor(Math.random() * colors.length)]; const size = Math.random() * 40 + 60; balloon.style.width = `${size}px`; balloon.style.height = `${size * 1.25}px`; balloon.style.left = `${Math.random() * 100}%`; const duration = Math.random() * 8 + 8; balloon.style.animation = `floatUp ${duration}s linear forwards`; balloonContainer.appendChild(balloon); setTimeout(() => balloon.remove(), duration * 1000);
             }
             
             function launchConfetti() {
-                const confettiContainer = document.getElementById('confetti-container');
-                const confettiCount = 150;
-                const confettiColors = ['#FFD700', '#FF69B4', '#87CEEB', '#98FB98', '#FFFFFF'];
+                const confettiContainer = document.getElementById('confetti-container'); const confettiCount = 150; const confettiColors = ['#FFD700', '#FF69B4', '#87CEEB', '#98FB98', '#FFFFFF'];
                 for (let i = 0; i < confettiCount; i++) {
-                    const confetti = document.createElement('div');
-                    confetti.classList.add('confetti');
-                    confetti.style.left = `${Math.random() * 100}vw`;
-                    confetti.style.backgroundColor = confettiColors[Math.floor(Math.random() * confettiColors.length)];
-                    confetti.style.transform = `rotateZ(${Math.random() * 360}deg)`;
-                    const duration = Math.random() * 3 + 4;
-                    const delay = Math.random() * 2;
-                    confetti.style.animation = `fall ${duration}s ${delay}s linear forwards`;
-                    confettiContainer.appendChild(confetti);
-                    setTimeout(() => confetti.remove(), (duration + delay) * 1000);
+                    const confetti = document.createElement('div'); confetti.classList.add('confetti'); confetti.style.left = `${Math.random() * 100}vw`; confetti.style.backgroundColor = confettiColors[Math.floor(Math.random() * confettiColors.length)]; confetti.style.transform = `rotateZ(${Math.random() * 360}deg)`; const duration = Math.random() * 3 + 4; const delay = Math.random() * 2; confetti.style.animation = `fall ${duration}s ${delay}s linear forwards`; confettiContainer.appendChild(confetti); setTimeout(() => confetti.remove(), (duration + delay) * 1000);
                 }
             }
 
             function splitTextIntoSpans(selector) {
-                const element = document.querySelector(selector);
-                if(element) {
-                    const text = element.textContent;
-                    const chars = text.split('').map(char => char === ' ' ? `<span class="char">&nbsp;</span>` : `<span class="char">${char}</span>`).join('');
-                    element.innerHTML = chars;
-                    return element.querySelectorAll('.char');
-                }
-                return [];
+                const element = document.querySelector(selector); if(element) { const text = element.textContent; const chars = text.split('').map(char => char === ' ' ? `<span class="char">&nbsp;</span>` : `<span class="char">${char}</span>`).join(''); element.innerHTML = chars; return element.querySelectorAll('.char'); } return [];
             }
 
             const curtain = document.getElementById('curtain');
@@ -686,23 +666,16 @@
             
             curtain.addEventListener('click', () => {
                 birthdaySong.play().catch(e => console.log("Audio play failed, user interaction needed."));
-                const h1Chars = splitTextIntoSpans('#main-heading');
-                const h2Chars = splitTextIntoSpans('#sub-heading');
-                const tl = gsap.timeline();
+                const h1Chars = splitTextIntoSpans('#main-heading'); const h2Chars = splitTextIntoSpans('#sub-heading'); const tl = gsap.timeline();
 
-                tl.to(curtain, { opacity: 0, duration: 2, ease: 'power2.inOut', onStart: launchConfetti, onComplete: () => {
-                    curtain.style.display = 'none';
-                    setInterval(createBalloon, 800);
-                }});
+                tl.to(curtain, { opacity: 0, duration: 2, ease: 'power2.inOut', onStart: launchConfetti, onComplete: () => { curtain.style.display = 'none'; setInterval(createBalloon, 800); }});
                 tl.to('#birthday-content', { autoAlpha: 1, duration: 0.1 }, "-=1.8");
                 tl.from(h1Chars, { y: 80, opacity: 0, scale: 1.5, rotationZ: 'random(-180, 180)', duration: 1.5, stagger: 0.03, ease: 'expo.out' }, "-=1.5");
                 tl.from(h2Chars, { y: 50, opacity: 0, rotationX: 90, duration: 1, stagger: 0.02, ease: 'power2.out' }, "-=1.2");
                 tl.from(['.image-container', '.message', '#countdown'], { scale: 0.5, opacity: 0, duration: 1.2, stagger: 0.2, ease: 'elastic.out(1, 0.75)' }, "-=0.8")
                   .add(() => {
-                      // After initial animations, start cycling messages if there's more than one
-                      if (greetings && greetings.length > 1) {
-                          cycleMessages(greetings);
-                      }
+                      if (greetings && greetings.length > 1) { cycleMessages(greetings); }
+                      if (imageUrls && imageUrls.length > 1) { cycleImages(imageUrls); } // Start cycling images
                   });
             }, { once: true });
         }
