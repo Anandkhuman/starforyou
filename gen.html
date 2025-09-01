@@ -103,27 +103,74 @@
             box-shadow: 0 5px 15px rgba(255, 215, 0, 0.4);
         }
         
+        /* --- STYLES FOR NEW RESULT CONTAINER --- */
         #result-container {
             margin-top: 25px;
-            background: rgba(0, 0, 0, 0.3);
-            padding: 15px;
-            border-radius: 8px;
+            text-align: left;
             display: none; /* Hidden by default */
-            word-wrap: break-word;
         }
         
         #result-container p {
             margin-bottom: 10px;
             color: rgba(255, 255, 255, 0.9);
+            font-size: 0.95rem;
+        }
+
+        .link-wrapper {
+            display: flex;
+            align-items: center;
+            background: rgba(0,0,0,0.4);
+            padding: 8px 12px;
+            border-radius: 8px;
         }
 
         #generated-link {
             font-weight: bold;
             color: #98fb98;
-            background: rgba(0,0,0,0.4);
-            padding: 8px;
-            border-radius: 5px;
-            display: inline-block;
+            background: none;
+            padding: 0;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            flex-grow: 1;
+            margin-right: 10px;
+            text-decoration: none;
+        }
+        #generated-link:hover {
+            text-decoration: underline;
+        }
+
+        #copy-btn {
+            background: transparent;
+            border: none;
+            padding: 0;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        #copy-btn svg {
+            width: 22px;
+            height: 22px;
+            fill: #FFD700;
+            transition: transform 0.2s, fill 0.2s;
+        }
+
+        #copy-btn:hover svg {
+            fill: #fff;
+            transform: scale(1.1);
+        }
+
+        #copy-feedback {
+            display: block;
+            margin-top: 8px;
+            font-size: 0.9em;
+            color: #98fb98;
+            height: 1.2em;
+            opacity: 0;
+            transition: opacity 0.3s ease-in-out;
         }
 
         /* --- STYLES FOR SURPRISE PAGE (MOBILE FIRST) --- */
@@ -222,10 +269,21 @@
             </div>
             <button class="generate-btn" onclick="generateLink()">Generate Surprise Link</button>
 
+            <!-- ==== NEW RESULT CONTAINER WITH COPY ICON ==== -->
             <div id="result-container">
                 <p>Success! Share this link:</p>
-                <a id="generated-link" href="#" target="_blank" rel="noopener noreferrer"></a>
+                <div class="link-wrapper">
+                    <a id="generated-link" href="#" target="_blank" rel="noopener noreferrer"></a>
+                    <button id="copy-btn" title="Copy to clipboard" onclick="copyLinkToClipboard()">
+                        <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 0 24 24" width="24px" fill="#FFD700">
+                            <path d="M0 0h24v24H0V0z" fill="none"/>
+                            <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-5zm0 16H8V7h11v14z"/>
+                        </svg>
+                    </button>
+                </div>
+                <span id="copy-feedback"></span>
             </div>
+            <!-- ============================================== -->
         </div>
     </div>
 
@@ -333,15 +391,13 @@
 
             database.ref('wishes/' + nameKey).set(wishData)
                 .then(() => {
-                    // This automatically gets the full, real URL of the current page.
-                    // It will work on your local computer AND on your live website.
                     const actualUrl = `${window.location.origin}${window.location.pathname}?name=${nameKey}`;
 
                     const resultContainer = document.getElementById('result-container');
                     const linkElement = document.getElementById('generated-link');
                     
-                    linkElement.textContent = actualUrl; // Show the real, working URL
-                    linkElement.href = actualUrl;      // Make it a clickable, working link
+                    linkElement.textContent = actualUrl;
+                    linkElement.href = actualUrl;
                     resultContainer.style.display = 'block';
 
                     alert('Surprise created successfully!');
@@ -350,6 +406,46 @@
                     console.error("Error saving data:", error);
                     alert("An error occurred. Please check your Firebase setup and try again.");
                 });
+        }
+
+        // --- NEW: FUNCTION TO COPY LINK TO CLIPBOARD ---
+        function copyLinkToClipboard() {
+            const linkElement = document.getElementById('generated-link');
+            const linkToCopy = linkElement.href;
+            const feedbackElement = document.getElementById('copy-feedback');
+            const copyBtn = document.getElementById('copy-btn');
+            
+            if (!navigator.clipboard) {
+                feedbackElement.textContent = 'Clipboard access not available.';
+                feedbackElement.style.color = '#FF6347'; // Error color
+                feedbackElement.style.opacity = '1';
+                setTimeout(() => { feedbackElement.style.opacity = '0'; feedbackElement.style.color = '#98fb98'; }, 3000);
+                return;
+            }
+
+            navigator.clipboard.writeText(linkToCopy).then(() => {
+                feedbackElement.textContent = 'Copied to clipboard!';
+                feedbackElement.style.color = '#98fb98'; // Success color
+                feedbackElement.style.opacity = '1';
+                
+                const originalIcon = copyBtn.innerHTML;
+                copyBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 0 24 24" width="24px" fill="#98fb98"><path d="M0 0h24v24H0V0z" fill="none"/><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/></svg>`;
+                copyBtn.disabled = true;
+                
+                setTimeout(() => {
+                    feedbackElement.style.opacity = '0';
+                    copyBtn.innerHTML = originalIcon;
+                    copyBtn.disabled = false;
+                }, 2000);
+
+            }).catch(err => {
+                feedbackElement.textContent = 'Failed to copy link.';
+                feedbackElement.style.color = '#FF6347';
+                feedbackElement.style.opacity = '1';
+                console.error('Could not copy text: ', err);
+
+                setTimeout(() => { feedbackElement.style.opacity = '0'; feedbackElement.style.color = '#98fb98'; }, 3000);
+            });
         }
         
         // --- 4. SURPRISE PAGE FUNCTIONS ---
