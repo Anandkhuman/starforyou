@@ -19,7 +19,7 @@
 
         body {
             font-family: 'Poppins', sans-serif;
-            height: 100vh;
+            min-height: 100vh;
             background: radial-gradient(ellipse at bottom, #1B2735 0%, #090A0F 100%);
             color: #fff;
             text-align: center;
@@ -37,7 +37,7 @@
         .form-wrapper {
             background: rgba(255, 255, 255, 0.05);
             border: 1px solid rgba(255, 255, 255, 0.2);
-            padding: 40px;
+            padding: 30px; /* Adjusted padding for mobile */
             border-radius: 15px;
             backdrop-filter: blur(10px);
             max-width: 500px;
@@ -47,7 +47,7 @@
         .form-wrapper h1 {
             font-family: 'Playfair Display', serif;
             margin-bottom: 25px;
-            font-size: 2.5rem;
+            font-size: 2.2rem; /* Adjusted for mobile */
             color: #FFD700;
         }
 
@@ -126,7 +126,7 @@
             display: inline-block;
         }
 
-        /* --- STYLES FOR SURPRISE PAGE (from your template) --- */
+        /* --- STYLES FOR SURPRISE PAGE (MOBILE FIRST) --- */
         #surprise-container {
             display: none; /* Hidden by default */
             overflow: hidden; /* Prevent scrollbars */
@@ -137,35 +137,20 @@
             left: 0;
         }
 
-        #bg-canvas {
+        #bg-canvas, #balloon-container, #confetti-container {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            z-index: -1;
-        }
-
-        #balloon-container {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 0;
-            overflow: hidden;
             pointer-events: none;
+            z-index: -1;
+            overflow: hidden;
         }
+        #balloon-container { z-index: 0; }
+        #confetti-container { z-index: 99; }
 
-        .balloon {
-            position: absolute;
-            bottom: -200px;
-            width: 80px;
-            height: 100px;
-            border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
-            background-size: cover;
-            opacity: 0.8;
-        }
+        .balloon { position: absolute; bottom: -200px; width: 80px; height: 100px; border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%; background-size: cover; opacity: 0.8; }
         .balloon::after { content: ''; position: absolute; bottom: -10px; left: 50%; transform: translateX(-50%); width: 0; height: 0; border-left: 5px solid transparent; border-right: 5px solid transparent; border-bottom: 10px solid; }
         .balloon.pink { background-image: radial-gradient(circle at 30% 30%, #ffc0cb, #e75480); }
         .balloon.pink::after { border-bottom-color: #e75480; }
@@ -175,10 +160,8 @@
         .balloon.yellow::after { border-bottom-color: #ffd700; }
         .balloon.green { background-image: radial-gradient(circle at 30% 30%, #98fb98, #3cb371); }
         .balloon.green::after { border-bottom-color: #3cb371; }
-
         @keyframes floatUp { 0% { transform: translateY(0) rotate(0deg); opacity: 0.8; } 100% { transform: translateY(-150vh) rotate(360deg); opacity: 0; } }
 
-        #confetti-container { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 99; overflow: hidden; }
         .confetti { position: absolute; width: 10px; height: 15px; top: -20px; opacity: 0; }
         @keyframes fall { 0% { transform: translateY(0vh) rotateZ(0deg); opacity: 1; } 100% { transform: translateY(110vh) rotateZ(720deg); opacity: 0; } }
 
@@ -188,53 +171,42 @@
         @keyframes pulse { 0%, 100% { transform: scale(1); filter: drop-shadow(0 0 5px #FFD700); } 50% { transform: scale(1.1); filter: drop-shadow(0 0 20px #FFD700); } }
 
         #birthday-content { display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100vh; padding: 20px; position: relative; z-index: 1; visibility: hidden; }
-        #birthday-content h1 { font-family: 'Playfair Display', serif; font-size: clamp(2.5rem, 8vw, 5rem); font-weight: 700; color: #fff; text-shadow: 0 0 10px rgba(255, 255, 255, 0.5), 0 0 20px rgba(255, 215, 0, 0.7); margin-bottom: 10px; }
         h1 span.char, h2 span.char { display: inline-block; }
+        #birthday-content h1 { font-family: 'Playfair Display', serif; font-size: clamp(2.5rem, 8vw, 5rem); font-weight: 700; color: #fff; text-shadow: 0 0 10px rgba(255, 255, 255, 0.5), 0 0 20px rgba(255, 215, 0, 0.7); margin-bottom: 10px; }
         #birthday-content h2 { font-family: 'Playfair Display', serif; font-size: clamp(1.5rem, 4vw, 2.5rem); color: #FFD700; text-shadow: 0 0 15px #FFD700; margin-bottom: 30px; }
         .image-container { margin: 0 0 30px 0; position: relative; }
-        #person-image { width: 150px; height: 150px; border-radius: 50%; object-fit: cover; border: 3px solid #FFD700; box-shadow: 0 0 15px rgba(255, 215, 0, 0.6), 0 0 25px rgba(255, 215, 0, 0.4); animation: glow-pulse 3s infinite ease-in-out; }
-        @keyframes glow-pulse { 0%, 100% { box-shadow: 0 0 15px rgba(255, 215, 0, 0.6), 0 0 25px rgba(255, 215, 0, 0.4); } 50% { box-shadow: 0 0 25px rgba(255, 215, 0, 0.8), 0 0 40px rgba(255, 215, 0, 0.6); } }
         .message { font-size: clamp(1rem, 2.5vw, 1.3rem); max-width: 600px; line-height: 1.8; color: rgba(255, 255, 255, 0.85); }
-        #countdown { margin-top: 40px; display: flex; gap: 20px; justify-content: center; }
-        .time-box { background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.2); padding: 15px 20px; border-radius: 10px; backdrop-filter: blur(5px); min-width: 90px; }
-        .time-box span { display: block; font-size: 2.5rem; font-weight: bold; }
-        .time-box p { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; color: rgba(255, 255, 255, 0.7); }
+        @keyframes glow-pulse { 0%, 100% { box-shadow: 0 0 15px rgba(255, 215, 0, 0.6), 0 0 25px rgba(255, 215, 0, 0.4); } 50% { box-shadow: 0 0 25px rgba(255, 215, 0, 0.8), 0 0 40px rgba(255, 215, 0, 0.6); } }
+        
+        #person-image { width: 120px; height: 120px; border-radius: 50%; object-fit: cover; border: 3px solid #FFD700; animation: glow-pulse 3s infinite ease-in-out; }
+        #countdown { margin-top: 40px; display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+        .time-box { background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.2); padding: 10px; border-radius: 10px; backdrop-filter: blur(5px); min-width: 70px; }
+        .time-box span { display: block; font-size: 1.8rem; font-weight: bold; }
+        .time-box p { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1px; color: rgba(255, 255, 255, 0.7); }
 
-        /* Fullscreen message for expired/not found links */
-        #message-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: #090A0F;
-            z-index: 200;
-            display: none; /* Hidden by default */
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            padding: 20px;
-        }
-        #message-overlay h1 { font-size: 3rem; color: #FFD700; }
-        #message-overlay p { font-size: 1.2rem; color: rgba(255, 255, 255, 0.8); max-width: 500px; }
+        #message-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #090A0F; z-index: 200; display: none; flex-direction: column; justify-content: center; align-items: center; padding: 20px; }
+        #message-overlay h1 { font-size: 2.5rem; color: #FFD700; }
+        #message-overlay p { font-size: 1.1rem; color: rgba(255, 255, 255, 0.8); max-width: 500px; }
 
-        @media (max-width: 480px) {
-            #person-image { width: 120px; height: 120px; }
-            #countdown { gap: 10px; }
-            .time-box { min-width: 70px; padding: 10px; }
-            .time-box span { font-size: 1.8rem; }
+        @media (min-width: 481px) {
+            .form-wrapper { padding: 40px; }
+            .form-wrapper h1 { font-size: 2.5rem; }
+            #person-image { width: 150px; height: 150px; }
+            #countdown { gap: 20px; }
+            .time-box { min-width: 90px; padding: 15px 20px; }
+            .time-box span { font-size: 2.5rem; }
+            .time-box p { font-size: 0.8rem; }
         }
     </style>
 </head>
 <body>
 
-    <!-- ======== 1. GENERATOR FORM CONTAINER ======== -->
     <div id="generator-container">
         <div class="form-wrapper">
             <h1>Create a Birthday Surprise</h1>
             <div class="form-group">
                 <label for="name">Birthday Person's Name</label>
-                <input type="text" id="name" placeholder="E.g., Pari" required>
+                <input type="text" id="name" placeholder="E.g., Priya" required>
             </div>
             <div class="form-group">
                 <label for="birthdate">Birthday Date</label>
@@ -252,87 +224,63 @@
 
             <div id="result-container">
                 <p>Success! Share this link:</p>
-                <span id="generated-link"></span>
+                <a id="generated-link" href="#" target="_blank" rel="noopener noreferrer"></a>
             </div>
         </div>
     </div>
     
-    <!-- ======== 2. SURPRISE PAGE CONTAINER ======== -->
     <div id="surprise-container">
-        <!-- The Surprise Curtain -->
         <div id="curtain">
             <div class="prompt">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
                 <p>A little star for you... Click it.</p>
             </div>
         </div>
-
-        <!-- The 3D Background Canvas -->
         <canvas id="bg-canvas"></canvas>
-
-        <!-- Balloons & Confetti Containers -->
         <div id="balloon-container"></div>
         <div id="confetti-container"></div>
-
-        <!-- The Main Birthday Content -->
         <div id="birthday-content">
-            <div class="content-wrapper">
-                <h1 id="main-heading">Happy Birthday Name</h1>
-                <h2 id="sub-heading">Name | 1 Jan 2025</h2>
-                
-                <div class="image-container">
-                    <img id="person-image" src="" alt="A special photo">
-                </div>
-
-                <p class="message">
-                    Your custom greeting message will appear here.
-                </p>
-                <div id="countdown">
-                    <div class="time-box"> <span id="days">00</span> <p>Days</p> </div>
-                    <div class="time-box"> <span id="hours">00</span> <p>Hours</p> </div>
-                    <div class="time-box"> <span id="minutes">00</span> <p>Minutes</p> </div>
-                    <div class="time-box"> <span id="seconds">00</span> <p>Seconds</p> </div>
-                </div>
+            <h1 id="main-heading">Happy Birthday Name</h1>
+            <h2 id="sub-heading">Name | 1 Jan 2025</h2>
+            <div class="image-container">
+                <img id="person-image" src="" alt="A special photo">
+            </div>
+            <p class="message">Your custom greeting message will appear here.</p>
+            <div id="countdown">
+                <div class="time-box"> <span id="days">00</span> <p>Days</p> </div>
+                <div class="time-box"> <span id="hours">00</span> <p>Hours</p> </div>
+                <div class="time-box"> <span id="minutes">00</span> <p>Minutes</p> </div>
+                <div class="time-box"> <span id="seconds">00</span> <p>Seconds</p> </div>
             </div>
         </div>
-
-        <!-- Background Music -->
         <audio id="birthday-song" loop>
             <source src="https://github.com/Anandkhuman/song/raw/main/happy-birthday.mp3" type="audio/mpeg">
         </audio>
     </div>
 
-    <!-- ======== 3. MESSAGE OVERLAY (For Expired/Not Found links) ======== -->
     <div id="message-overlay">
         <h1 id="message-heading"></h1>
         <p id="message-text"></p>
     </div>
 
-
-    <!-- ======== JAVASCRIPT LIBRARIES ======== -->
-    <!-- Firebase SDKs -->
     <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-database.js"></script>
-    <!-- Animation Libraries -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.9.1/gsap.min.js"></script>
 
-
-    <!-- ======== MAIN SCRIPT ======== -->
     <script>
         // --- 1. FIREBASE SETUP ---
         // IMPORTANT: Replace the following with your own Firebase project configuration.
         const firebaseConfig = {
-  apiKey: "AIzaSyAjvI_Vl4trHwZAosaGLdEYQ87jJHeGYwc",
-  authDomain: "studio-ahutj.firebaseapp.com",
-  databaseURL: "https://studio-ahutj-default-rtdb.firebaseio.com",
-  projectId: "studio-ahutj",
-  storageBucket: "studio-ahutj.firebasestorage.app",
-  messagingSenderId: "636752463109",
-  appId: "1:636752463109:web:da78d4100720a39a20a36c"
-};
+            apiKey: "YOUR_API_KEY",
+            authDomain: "YOUR_AUTH_DOMAIN",
+            databaseURL: "YOUR_DATABASE_URL",
+            projectId: "YOUR_PROJECT_ID",
+            storageBucket: "YOUR_STORAGE_BUCKET",
+            messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+            appId: "YOUR_APP_ID"
+        };
 
-        // Initialize Firebase
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
 
@@ -342,11 +290,9 @@
             const nameKey = urlParams.get('name');
 
             if (nameKey) {
-                // Surprise Mode: A name is in the URL, so load the surprise
                 document.getElementById('generator-container').style.display = 'none';
                 loadWishData(nameKey);
             } else {
-                // Generator Mode: No name in URL, show the form
                 document.getElementById('surprise-container').style.display = 'none';
             }
         });
@@ -363,9 +309,7 @@
                 return;
             }
 
-            // Sanitize the name to be used as a URL-friendly key
             const nameKey = name.trim().toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
-
             if(!nameKey) {
                 alert('Please enter a valid name.');
                 return;
@@ -379,20 +323,17 @@
                 createdAt: firebase.database.ServerValue.TIMESTAMP
             };
 
-            // Save data to Firebase
             database.ref('wishes/' + nameKey).set(wishData)
                 .then(() => {
-                    const domain = 'sintha.in'; // As requested
-                    const generatedUrl = `https://${domain}?name=${nameKey}`;
-                    
-                    // Note: For local testing, the actual functional link is different.
-                    const functionalUrl = `${window.location.origin}${window.location.pathname}?name=${nameKey}`;
+                    // This automatically gets the full, real URL of the current page.
+                    // It will work on your local computer AND on your live website.
+                    const actualUrl = `${window.location.origin}${window.location.pathname}?name=${nameKey}`;
 
                     const resultContainer = document.getElementById('result-container');
                     const linkElement = document.getElementById('generated-link');
                     
-                    linkElement.textContent = generatedUrl;
-                    linkElement.href = functionalUrl; // Make it a clickable link for testing
+                    linkElement.textContent = actualUrl; // Show the real, working URL
+                    linkElement.href = actualUrl;      // Make it a clickable, working link
                     resultContainer.style.display = 'block';
 
                     alert('Surprise created successfully!');
@@ -419,15 +360,12 @@
                     const data = snapshot.val();
                     const twoDaysInMillis = 2 * 24 * 60 * 60 * 1000;
                     
-                    // Check if the data has expired (older than 2 days)
                     if (Date.now() - data.createdAt > twoDaysInMillis) {
                         showMessage('Oh no!', 'This surprise link has expired. Links are only valid for 2 days.');
-                        // Clean up the expired data from the database
                         wishRef.remove();
                         return;
                     }
 
-                    // Data is valid, populate and show the surprise page
                     populateSurprisePage(data);
                     document.getElementById('surprise-container').style.display = 'block';
                     initializeSurpriseAnimations(data.birthdate);
@@ -454,11 +392,8 @@
             document.querySelector('.message').textContent = data.greeting;
         }
 
-        // --- 5. ANIMATION & INTERACTIVITY LOGIC (from your template) ---
-        // This function will be called only when a valid surprise is loaded.
+        // --- 5. ANIMATION & INTERACTIVITY LOGIC ---
         function initializeSurpriseAnimations(birthdayDateString) {
-            
-            // --- Three.js Starfield Scene ---
             const scene = new THREE.Scene();
             const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
             const renderer = new THREE.WebGLRenderer({ canvas: document.querySelector('#bg-canvas'), antialias: true });
@@ -486,7 +421,6 @@
                 camera.updateProjectionMatrix();
             });
 
-            // --- Countdown Timer ---
             let timerInterval;
             function setupCountdown() {
                 const birthday = new Date(birthdayDateString + 'T00:00:00');
@@ -494,7 +428,7 @@
                     const now = new Date();
                     const diff = birthday - now;
                     if (diff <= 0) {
-                        document.getElementById('countdown').innerHTML = "<h2>The day is here! Happy Birthday!</h2>";
+                        document.getElementById('countdown').innerHTML = "<h2 style='width: 100%; font-size: 1.5rem;'>The day is here! Happy Birthday!</h2>";
                         clearInterval(timerInterval);
                         return;
                     }
@@ -507,9 +441,8 @@
                 timerInterval = setInterval(updateCountdown, 1000);
                 updateCountdown();
             }
-            setupCountdown(); // Initialize the countdown
+            setupCountdown();
 
-            // --- Balloons ---
             const balloonContainer = document.getElementById('balloon-container');
             const colors = ['pink', 'blue', 'yellow', 'green'];
             function createBalloon() {
@@ -525,7 +458,6 @@
                 setTimeout(() => balloon.remove(), duration * 1000);
             }
             
-            // --- Confetti ---
             function launchConfetti() {
                 const confettiContainer = document.getElementById('confetti-container');
                 const confettiCount = 150;
@@ -544,7 +476,6 @@
                 }
             }
 
-            // --- Text Splitting ---
             function splitTextIntoSpans(selector) {
                 const element = document.querySelector(selector);
                 if(element) {
@@ -556,27 +487,19 @@
                 return [];
             }
 
-            // --- GSAP Surprise Animation & Music ---
             const curtain = document.getElementById('curtain');
             const birthdaySong = document.getElementById('birthday-song');
             
             curtain.addEventListener('click', () => {
                 birthdaySong.play().catch(e => console.log("Audio play failed, user interaction needed."));
-
                 const h1Chars = splitTextIntoSpans('#main-heading');
                 const h2Chars = splitTextIntoSpans('#sub-heading');
                 const tl = gsap.timeline();
 
-                tl.to(curtain, {
-                    opacity: 0,
-                    duration: 2,
-                    ease: 'power2.inOut',
-                    onStart: launchConfetti,
-                    onComplete: () => {
-                        curtain.style.display = 'none';
-                        setInterval(createBalloon, 800);
-                    }
-                });
+                tl.to(curtain, { opacity: 0, duration: 2, ease: 'power2.inOut', onStart: launchConfetti, onComplete: () => {
+                    curtain.style.display = 'none';
+                    setInterval(createBalloon, 800);
+                }});
                 tl.to('#birthday-content', { autoAlpha: 1, duration: 0.1 }, "-=1.8");
                 tl.from(h1Chars, { y: 80, opacity: 0, scale: 1.5, rotationZ: 'random(-180, 180)', duration: 1.5, stagger: 0.03, ease: 'expo.out' }, "-=1.5");
                 tl.from(h2Chars, { y: 50, opacity: 0, rotationX: 90, duration: 1, stagger: 0.02, ease: 'power2.out' }, "-=1.2");
